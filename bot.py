@@ -1,5 +1,6 @@
 import logging
 from aiogram import Bot, Dispatcher, executor, types
+from aiogram.types import ReplyKeyboardRemove, ReplyKeyboardMarkup, KeyboardButton
 from settings import API_TOKEN
 from roll_dice import roll_dice
 
@@ -8,18 +9,21 @@ logging.basicConfig(level=logging.INFO)
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher(bot)
 
-@dp.message_handler(commands=["start", "help"])
-async def send_welcome(message: types.Message):
-   await message.reply("Я бот для броска костей.\nНабор комманд: roll4, roll6, roll8, roll10, roll12, roll20, roll100")
+dice_keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True).row(
+    types.KeyboardButton(text="Кинуть d4"), types.KeyboardButton(text="Кинуть d6")).row(
+    types.KeyboardButton(text="Кинуть d8"), types.KeyboardButton(text="Кинуть d10")).row(
+    types.KeyboardButton(text="Кинуть d12"), types.KeyboardButton(text="Кинуть d20")).row(
+    types.KeyboardButton(text="Кинуть d100"))
 
-
-@dp.message_handler(commands=["roll4", "roll6", "roll8", "roll10", "roll12", "roll20", "roll100"])
-async def send_welcome(message: types.Message):
-   dice = int(message.text[5:])
+@dp.message_handler(regexp="Кинуть d\d*")
+async def send_roll(message: types.Message):
+   dice = int(message.text[8:])
    facet = roll_dice(dice)
-   await message.answer(facet)
+   print(message.from_user.id, message.from_user.first_name)
+   await message.answer(f"{message.from_user.first_name}, у тебя выпало {facet}", reply_markup=dice_keyboard)
 
 
+@dp.message_handler(commands=["start", "help"])
 @dp.message_handler()
-async def echo(message: types.Message):
-   await message.answer(message.text)
+async def send_welcome(message: types.Message):
+   await message.answer("Я бот для броска костей.\n", reply_markup=dice_keyboard)
