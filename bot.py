@@ -21,10 +21,12 @@ async def send_roll(message: types.Message):
    dice = int(message.text[8:])
    facet = roll_dice(dice)
    img = make_facet_img(facet)
-   content = io.BytesIO(img)
+   img_byte_arr = io.BytesIO()
+   img.save(img_byte_arr, format='PNG')
+   img_byte_arr = img_byte_arr.getvalue()
    print(message.from_user.id, message.from_user.first_name)
-   await message.answer_photo(content)
-   await message.answer(f"{message.from_user.first_name}, у тебя выпало {facet}", reply_markup=dice_keyboard)
+   await message.answer_photo(img_byte_arr, reply_markup=dice_keyboard)
+   # await message.answer(f"{message.from_user.first_name}, у тебя выпало {facet}", reply_markup=dice_keyboard)
 
 
 @dp.message_handler(commands=["start", "help"])
