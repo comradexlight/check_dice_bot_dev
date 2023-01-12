@@ -1,9 +1,10 @@
+import io
 import logging
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.types import ReplyKeyboardRemove, ReplyKeyboardMarkup, KeyboardButton
 from settings import API_TOKEN
 from roll_dice import roll_dice
-
+from dice_img import make_facet_img
 
 logging.basicConfig(level=logging.INFO)
 bot = Bot(token=API_TOKEN)
@@ -19,7 +20,10 @@ dice_keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboar
 async def send_roll(message: types.Message):
    dice = int(message.text[8:])
    facet = roll_dice(dice)
+   img = make_facet_img(facet)
+   content = io.BytesIO(img)
    print(message.from_user.id, message.from_user.first_name)
+   await message.answer_photo(content)
    await message.answer(f"{message.from_user.first_name}, у тебя выпало {facet}", reply_markup=dice_keyboard)
 
 
