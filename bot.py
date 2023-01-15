@@ -1,34 +1,31 @@
-import io
 import logging
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.types import ReplyKeyboardRemove, ReplyKeyboardMarkup, KeyboardButton
 from settings import API_TOKEN
-from roll_dice import roll_dice
-from dice_img import make_facet_img, print_number
+from utils import roll_dice, from_image_to_bytes
+from make_img import print_number
 
 logging.basicConfig(level=logging.INFO)
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher(bot)
 
-dice_keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True).row(
-    types.KeyboardButton(text="Кинуть d4"), types.KeyboardButton(text="Кинуть d6")).row(
-    types.KeyboardButton(text="Кинуть d8"), types.KeyboardButton(text="Кинуть d10")).row(
-    types.KeyboardButton(text="Кинуть d12"), types.KeyboardButton(text="Кинуть d20")).row(
-    types.KeyboardButton(text="Кинуть d100"))
+dice_keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True,
+                                          one_time_keyboard=True).row(
+    types.KeyboardButton(text="Кинуть d4"),
+    types.KeyboardButton(text="Кинуть d6")).row(
+    types.KeyboardButton(text="Кинуть d8"),
+    types.KeyboardButton(text="Кинуть d10")).row(
+    types.KeyboardButton(text="Кинуть d12"),
+    types.KeyboardButton(text="Кинуть d20"))
 
 @dp.message_handler(regexp="Кинуть d\d*")
 async def send_roll(message: types.Message):
-   dice = int(message.text[8:]) #TODO Рефакторинг названий
-   facet = roll_dice(dice) #TODO Рефакторинг названий 
-   # img = make_facet_img(facet)
-   img = print_number(facet)
-   img_byte_arr = io.BytesIO() #TODO Рефакторинг названий
-   img.save(img_byte_arr, format='PNG') #TODO Нужно привести к одному формату
-   del img
-   img_byte_arr = img_byte_arr.getvalue() #TODO Рефакторинг названий
+   dice = int(message.text[8:]) 
+   rolled_number = roll_dice(dice)
+   number_image = print_number(rolled_number)
+   img_to_send = from_image_to_bytes(number_image)
    print(message.from_user.id, message.from_user.first_name)
-   await message.answer_photo(img_byte_arr, reply_markup=dice_keyboard)
-   # await message.answer(f"{message.from_user.first_name}, у тебя выпало {facet}", reply_markup=dice_keyboard)
+   await message.answer_photo(img_to_send, reply_markup=dice_keyboard)
 
 
 @dp.message_handler(commands=["start", "help"])
