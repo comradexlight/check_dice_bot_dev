@@ -3,7 +3,9 @@ from aiogram import Bot, Dispatcher, executor, types
 from aiogram.types import ReplyKeyboardRemove, ReplyKeyboardMarkup, KeyboardButton
 from settings import API_TOKEN
 from utils import roll_dice, from_image_to_bytes
-from make_img import print_number
+from make_img import print_number, make_facet_img
+from memory_profiler import profile
+
 
 logging.basicConfig(level=logging.INFO)
 bot = Bot(token=API_TOKEN)
@@ -18,11 +20,13 @@ dice_keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True,
     types.KeyboardButton(text="Кинуть d12"),
     types.KeyboardButton(text="Кинуть d20"))
 
+@profile
 @dp.message_handler(regexp="Кинуть d\d*")
 async def send_roll(message: types.Message):
    dice = int(message.text[8:]) 
    rolled_number = roll_dice(dice)
    number_image = print_number(rolled_number)
+   # number_image = make_facet_img(rolled_number)
    img_to_send = from_image_to_bytes(number_image)
    print(message.from_user.id, message.from_user.first_name)
    await message.answer_photo(img_to_send, reply_markup=dice_keyboard)
