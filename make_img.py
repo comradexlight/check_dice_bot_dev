@@ -1,7 +1,7 @@
 from PIL import Image, ImageDraw, ImageFont
+from PIL.Image import Image as ImageClass
 
-
-def make_facet_img(facet: int):
+def make_facet_img(facet: int) -> ImageClass:
     img = Image.new('RGB', (300, 300), "grey")
     draw = ImageDraw.Draw(img)
     draw.rounded_rectangle((25, 25, 275, 275), radius=15, fill='black')
@@ -19,7 +19,7 @@ def make_template() -> None:
     img.save("src/images/blank.jpg", "JPEG")
 
 
-def print_number(number: int) -> Image: 
+def print_number(number: int) -> ImageClass: 
     img = Image.open("src/images/blank.jpg")
     draw = ImageDraw.Draw(img)
     font = ImageFont.truetype("src/fonts/Alice-Regular.ttf", 120)
